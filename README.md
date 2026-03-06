@@ -40,6 +40,16 @@ npxall ms 60000                              # → 1m
 npxall semver valid "1.2.3"                  # → 1.2.3
 npxall semver gt "2.0.0" "1.0.0"            # → true
 npxall lodash chunk '[1,2,3,4]' 2           # → [[1,2],[3,4]]
+npxall slugify "Hello World! 2024" '{"lower":true,"strict":true}'  # → hello-world-2024
+npxall uuid v4                               # → 550e8400-e29b-41d4-a716-…
+npxall pretty-bytes 1073741824              # → 1 GB
+npxall chroma-js contrast '"#ff0000"' '"#ffffff"'  # → 3.998…
+npxall yaml parse "key: value"              # → {"key":"value"}
+npxall marked parse '"# Hello"'            # → <h1>Hello</h1>
+npxall he encode '"<b>Hello & World</b>"'  # → &#x3C;b&#x3E;Hello &#x26; World&#x3C;/b&#x3E;
+npxall qs stringify '{"page":1,"q":"foo"}' # → page=1&q=foo
+npxall jsonpath query '{"a":{"b":42}}' '"$.a.b"'  # → [42]
+npxall flat flatten '{"a":{"b":{"c":1}}}'  # → {"a.b.c":1}
 ```
 
 ### Method chaining with `.`
@@ -74,6 +84,43 @@ echo '"hello world"' | npxall lodash camelCase -
 cat data.json | npxall lodash get - "user.name"
 ```
 
+### Shell substitution `"$(command)"`
+
+Pass the output of any shell command as an argument. **Always double-quote** the substitution — without quotes the shell word-splits the output on whitespace and only the first word reaches npxall.
+
+```bash
+# Parse a YAML config file
+npxall yaml parse "$(cat config.yaml)"
+
+# Query a JSON file with a JSONPath expression
+npxall jsonpath query "$(cat users.json)" '"$.users[0].name"'
+
+# Convert a Markdown file to HTML
+npxall marked parse "$(cat README.md)"
+
+# HTML-encode a template
+npxall he encode "$(cat template.html)"
+
+# Turn a JSON filter file into a query string
+npxall qs stringify "$(cat filter.json)"
+
+# Combine with chaining
+npxall yaml parse "$(cat config.yaml)" . get '"db.host"'
+```
+
+#### Shell compatibility
+
+| Shell | Syntax | Notes |
+|-------|--------|-------|
+| sh, bash, zsh, dash | `"$(cat file)"` | Standard POSIX substitution |
+| PowerShell (pwsh) | `"$(cat file)"` | `cat` aliases `Get-Content` on Windows; identical syntax on macOS/Linux |
+| fish | `(cat file \| string collect)` | Different substitution syntax; `string collect` joins lines into one argument |
+| cmd.exe | ❌ | No substitution support — use Git Bash, WSL, or PowerShell |
+
+> **Why the quotes matter:**
+> `"$(cat file)"` → one argument containing the full file content
+> `$(cat file)` → shell word-splits on whitespace; npxall only sees the first word
+
 ### JSON arguments
 
 Arguments that look like valid JSON are parsed automatically:
@@ -106,9 +153,9 @@ Packages are cached indefinitely — subsequent calls skip installation entirely
 
 ```bash
 git clone https://github.com/adrienj/npxall.git
-cd anyx
+cd npxall
 npm install
-npm test          # run CLI tests (79 tests)
+npm test          # run CLI tests (146 tests)
 
 cd web
 npm install
