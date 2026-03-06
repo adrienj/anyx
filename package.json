@@ -4,7 +4,7 @@
   "description": "Run any npm function from the command line",
   "type": "module",
   "bin": {
-    "anyx": "./cli.js"
+    "anyx": "cli.js"
   },
   "files": [
     "cli.js"
@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adrienj/anyx.git"
+    "url": "git+https://github.com/adrienj/anyx.git"
   },
   "homepage": "https://adrienj.github.io/anyx/",
   "bugs": {
