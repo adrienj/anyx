@@ -1,0 +1,45 @@
+{
+  "name": "anyx",
+  "version": "0.1.0",
+  "description": "Run any npm function from the command line",
+  "type": "module",
+  "bin": {
+    "anyx": "./cli.js"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "cli",
+    "npm",
+    "runner",
+    "utility",
+    "function",
+    "exec"
+  ],
+  "author": "adrienj",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adrienj/anyx.git"
+  },
+  "homepage": "https://adrienj.github.io/anyx/",
+  "bugs": {
+    "url": "https://github.com/adrienj/anyx/issues"
+  },
+  "devDependencies": {
+    "@turf/turf": "^7.3.4",
+    "change-case": "^5.4.4",
+    "date-fns": "^4.1.0",
+    "is-boolean-object": "^1.2.2",
+    "lodash": "^4.17.23",
+    "mathjs": "^15.1.1",
+    "ms": "^2.1.3",
+    "semver": "^7.7.4",
+    "validator": "^13.15.26",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

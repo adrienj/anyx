@@ -1,0 +1,6 @@
+import { defineConfig } from 'vitest/config';
+export default defineConfig({
+  base: '/anyx/',
+  build: { outDir: 'dist' },
+  test: { testTimeout: 15000 },
+});
