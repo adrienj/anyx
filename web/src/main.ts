@@ -186,7 +186,7 @@ function attachLanding() {
 function searchHtml(value = '') {
   return `
     <header>
-      <div class="logo">npxall</div>
+      <a class="logo" href="/npxall/" aria-label="npxall home">npxall</a>
       <p class="tagline">Run any npm function from the command line</p>
       <form id="search" class="search-wrap">
         <input name="pkg" value="${escHtml(value)}" placeholder="lodash, semver, ms, change-case…" autocomplete="off" autofocus />
@@ -225,6 +225,14 @@ function cardHtml(fn: FnDoc, i: number): string {
 }
 
 function attach() {
+  document.querySelector<HTMLAnchorElement>("a.logo")?.addEventListener("click", e => {
+    e.preventDefault();
+    history.replaceState(null, "", location.pathname);
+    app.innerHTML = searchHtml() + landingHtml();
+    attach();
+    attachLanding();
+    startTerminalDemo();
+  });
   document.querySelector<HTMLFormElement>('#search')?.addEventListener('submit', e => {
     e.preventDefault();
     const pkg = (e.currentTarget as HTMLFormElement).pkg.value.trim();

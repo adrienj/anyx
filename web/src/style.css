@@ -48,7 +48,7 @@ header {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-block;
+  display: inline-block; user-select: none; cursor: pointer; text-decoration: none;
   margin-bottom: .25rem;
 }
 

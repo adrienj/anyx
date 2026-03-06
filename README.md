@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![CI](https://github.com/adrienj/npxall/actions/workflows/ci.yml/badge.svg)](https://github.com/adrienj/npxall/actions/workflows/ci.yml)
-[![Web UI](https://img.shields.io/badge/web-adrienj.github.io%2Fanyx-blue)](https://adrienj.github.io/anyx/)
+[![Web UI](https://img.shields.io/badge/web-adrienj.github.io%2Fnpxall-blue)](https://adrienj.github.io/npxall/)
 
 **Run any npm function directly from the command line — without writing a script.**
 
@@ -87,7 +87,7 @@ npxall lodash pick '{"a":1,"b":2,"c":3}' '["a","c"]'
 
 ## Web UI
 
-Browse exported functions for any package at **[adrienj.github.io/anyx](https://adrienj.github.io/anyx/)** — type a package name and see every function with its signature, description, and ready-to-run CLI example.
+Browse exported functions for any package at **[adrienj.github.io/npxall](https://adrienj.github.io/npxall/)** — type a package name and see every function with its signature, description, and ready-to-run CLI example.
 
 ---
 
