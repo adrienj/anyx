@@ -18,7 +18,6 @@ function escHtml(s: string): string {
 const DEMOS: Array<{ cmd: string; result: string }> = [
   { cmd: 'npx npxall ms 86400000',                                  result: '1d'           },
   { cmd: 'npxall change-case camelCase "hello world"',              result: 'helloWorld'   },
-  { cmd: 'npx npxall semver gt "2.0.0" "1.0.0"',                   result: 'true'         },
   { cmd: "npxall lodash chunk '[1,2,3,4,5,6]' 2",                  result: '[[1,2],[3,4],[5,6]]' },
   { cmd: 'npx npxall lodash "foo bar" . split " " . reverse . join "-"', result: 'bar-foo' },
 ];
@@ -118,7 +117,6 @@ function landingHtml(): string {
         <div class="ex-grid">
           ${exCard('String case',     'npx npxall change-case camelCase "hello world"',             'helloWorld')}
           ${exCard('Time conversion', 'npx npxall ms 86400000',                                     '1d')}
-          ${exCard('Version compare', 'npx npxall semver gt "2.0.0" "1.0.0"',                       'true')}
           ${exCard('Array split',     "npx npxall lodash chunk '[1,2,3,4]' 2",                      '[[1,2],[3,4]]')}
           ${exCard('Method chaining', 'npxall lodash "foo bar" . split " " . reverse . join "-"',   'bar-foo')}
           ${exCard('Stdin piping',    'echo "hello world" | npxall change-case pascalCase -',       'HelloWorld')}
@@ -158,7 +156,7 @@ function landingHtml(): string {
       </div>
 
       <footer class="site-footer">
-        <a href="https://github.com/adrienj/anyx" target="_blank">GitHub</a>
+        <a href="https://github.com/adrienj/npxall" target="_blank">GitHub</a>
         <span>·</span>
         <a href="https://www.npmjs.com/package/npxall" target="_blank">npm</a>
         <span>·</span>

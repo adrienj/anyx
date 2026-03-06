@@ -5,15 +5,15 @@ Thanks for taking the time to contribute!
 ## Getting started
 
 ```bash
-git clone https://github.com/adrienj/anyx.git
-cd anyx
+git clone https://github.com/adrienj/npxall.git
+cd npxall
 npm install
 ```
 
 ## Project structure
 
 ```
-anyx/
+npxall/
 ├── cli.js              # CLI entry point
 ├── test/
 │   └── cli.test.js     # CLI integration tests
@@ -49,7 +49,7 @@ All tests must pass before submitting a pull request.
 
 ## Reporting bugs
 
-Use [GitHub Issues](https://github.com/adrienj/anyx/issues). Include:
+Use [GitHub Issues](https://github.com/adrienj/npxall/issues). Include:
 - The exact command you ran
 - The actual output
 - The expected output

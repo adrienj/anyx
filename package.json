@@ -24,11 +24,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adrienj/anyx.git"
+    "url": "git+https://github.com/adrienj/npxall.git"
   },
   "homepage": "https://adrienj.github.io/anyx/",
   "bugs": {
-    "url": "https://github.com/adrienj/anyx/issues"
+    "url": "https://github.com/adrienj/npxall/issues"
   },
   "devDependencies": {
     "@turf/turf": "^7.3.4",
