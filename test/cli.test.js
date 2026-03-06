@@ -455,35 +455,40 @@ const SHELL_CASES = [
     label:   'yaml parse "$(cat config.yaml)" — YAML config to JSON',
     file:    'config.yaml',
     content: 'host: localhost\nport: 5432\nssl: true',
-    cmd:     file => `node "${CLI}" yaml parse "$(cat "${file}")"`,
+    cmd:     file => `node "${CLI}" yaml parse "$(cat '${file}')"`,
+    pwshCmd: file => `node "${CLI}" yaml parse "$(Get-Content -Raw '${file}')"`,
     assert:  (out, content) => expect(JSON.parse(out)).toEqual(yaml.parse(content)),
   },
   {
     label:   'jsonpath query "$(cat data.json)" — extract field',
     file:    'data.json',
     content: JSON.stringify({ users: [{ name: 'Alice' }, { name: 'Bob' }] }),
-    cmd:     file => `node "${CLI}" jsonpath query "$(cat "${file}")" '"$.users[0].name"'`,
+    cmd:     file => `node "${CLI}" jsonpath query "$(cat '${file}')" '"$.users[0].name"'`,
+    pwshCmd: file => `node "${CLI}" jsonpath query "$(Get-Content -Raw '${file}')" '"$.users[0].name"'`,
     assert:  out => expect(JSON.parse(out)).toEqual(['Alice']),
   },
   {
     label:   'marked parse "$(cat README.md)" — markdown to HTML',
     file:    'README.md',
     content: '# Hello\n\nSome **bold** text.',
-    cmd:     file => `node "${CLI}" marked parse "$(cat "${file}")"`,
+    cmd:     file => `node "${CLI}" marked parse "$(cat '${file}')"`,
+    pwshCmd: file => `node "${CLI}" marked parse "$(Get-Content -Raw '${file}')"`,
     assert:  (out, content) => expect(out).toBe(marked.parse(content).trim()),
   },
   {
     label:   'he encode "$(cat template.html)" — HTML-encode a file',
     file:    'template.html',
     content: '<section>\n  <p>Hello & World</p>\n</section>',
-    cmd:     file => `node "${CLI}" he encode "$(cat "${file}")"`,
+    cmd:     file => `node "${CLI}" he encode "$(cat '${file}')"`,
+    pwshCmd: file => `node "${CLI}" he encode "$(Get-Content -Raw '${file}')"`,
     assert:  (out, content) => expect(out).toBe(he.encode(content)),
   },
   {
     label:   'qs stringify "$(cat filter.json)" — JSON to query string',
     file:    'filter.json',
     content: JSON.stringify({ status: 'open', page: 1 }),
-    cmd:     file => `node "${CLI}" qs stringify "$(cat "${file}")"`,
+    cmd:     file => `node "${CLI}" qs stringify "$(cat '${file}')"`,
+    pwshCmd: file => `node "${CLI}" qs stringify "$(Get-Content -Raw '${file}')"`,
     assert:  (out, content) => expect(out).toBe(qs.stringify(JSON.parse(content))),
   },
 ];
@@ -512,14 +517,13 @@ for (const shell of POSIX_SHELLS) {
   });
 }
 
-// PowerShell (pwsh / powershell) — uses -Command flag; $(cat file) works on all OSes:
-// 'cat' is aliased to Get-Content on Windows, real cat binary on macOS/Linux.
+// PowerShell (pwsh / powershell) — uses -Command flag and Get-Content -Raw to preserve newlines.
 describe(`shell $(cat file) — ${PWSH ?? 'pwsh (not installed)'}`, () => {
-  for (const { label, file, content, cmd, assert } of SHELL_CASES) {
+  for (const { label, file, content, pwshCmd, assert } of SHELL_CASES) {
     const testFn = PWSH ? it : it.skip;
     testFn(label, () =>
       withTmpFile(`pwsh-${file}`, content, path =>
-        assert(runInShell(PWSH, '-Command', cmd(path)), content)));
+        assert(runInShell(PWSH, '-Command', pwshCmd(path)), content)));
   }
 });
 

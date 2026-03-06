@@ -26,13 +26,12 @@ function isInstalled(packageName) {
   return existsSync(pkgDir(packageName));
 }
 
-const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-
 function install(packageName) {
   ensureCache();
-  const result = spawnSync(NPM, ['install', packageName, '--no-save', '--silent'], {
+  const result = spawnSync('npm', ['install', packageName, '--no-save', '--silent'], {
     cwd: CACHE_DIR,
     stdio: 'pipe',
+    shell: process.platform === 'win32',
   });
   if (result.status !== 0) {
     process.stderr.write(`Failed to install '${packageName}'\n`);
