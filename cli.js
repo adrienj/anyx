@@ -7,7 +7,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { pathToFileURL } from 'url';
 
-const CACHE_DIR = join(homedir(), '.anyx');
+const CACHE_DIR = join(homedir(), '.npxall');
 const CACHE_PKG = join(CACHE_DIR, 'package.json');
 
 function ensureCache() {

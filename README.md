@@ -1,4 +1,4 @@
-# anyx
+# npxall
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
@@ -13,7 +13,7 @@ npx npxall ms 2000                          # → 2s
 npx npxall change-case snakeCase "Foo Bar"  # → foo_bar
 ```
 
-Packages are downloaded on first use and cached in `~/.anyx/`. No global installs, no boilerplate.
+Packages are downloaded on first use and cached in `~/.npxall/`. No global installs, no boilerplate.
 
 ---
 
@@ -30,29 +30,29 @@ Or use without installing via `npx npxall <package> ...`.
 ## Usage
 
 ```
-anyx <package> [method] [args...]
+npxall <package> [method] [args...]
 ```
 
 ### Basic call
 
 ```bash
-anyx ms 60000                              # → 1m
-anyx semver valid "1.2.3"                  # → 1.2.3
-anyx semver gt "2.0.0" "1.0.0"            # → true
-anyx lodash chunk '[1,2,3,4]' 2           # → [[1,2],[3,4]]
+npxall ms 60000                              # → 1m
+npxall semver valid "1.2.3"                  # → 1.2.3
+npxall semver gt "2.0.0" "1.0.0"            # → true
+npxall lodash chunk '[1,2,3,4]' 2           # → [[1,2],[3,4]]
 ```
 
 ### Method chaining with `.`
 
 ```bash
-anyx lodash "hello world" . split " " . reverse . join "-"
+npxall lodash "hello world" . split " " . reverse . join "-"
 # → world-hello
 ```
 
 ### Dot shorthand
 
 ```bash
-anyx lodash camelCase.toUpper "hello world"
+npxall lodash camelCase.toUpper "hello world"
 # → HELLOWORLD
 ```
 
@@ -61,17 +61,17 @@ anyx lodash camelCase.toUpper "hello world"
 Use `[...]` to pass the result of one call as an argument to another:
 
 ```bash
-anyx lodash cloneDeep '[ lodash omit {"a":1,"b":2} "b" ]'
+npxall lodash cloneDeep '[ lodash omit {"a":1,"b":2} "b" ]'
 # → {"a":1}
 ```
 
 ### Stdin with `-`
 
 ```bash
-echo '"hello world"' | anyx lodash camelCase -
+echo '"hello world"' | npxall lodash camelCase -
 # → helloWorld
 
-cat data.json | anyx lodash get - "user.name"
+cat data.json | npxall lodash get - "user.name"
 ```
 
 ### JSON arguments
@@ -79,7 +79,7 @@ cat data.json | anyx lodash get - "user.name"
 Arguments that look like valid JSON are parsed automatically:
 
 ```bash
-anyx lodash pick '{"a":1,"b":2,"c":3}' '["a","c"]'
+npxall lodash pick '{"a":1,"b":2,"c":3}' '["a","c"]'
 # → {"a":1,"c":3}
 ```
 
@@ -93,7 +93,7 @@ Browse exported functions for any package at **[adrienj.github.io/anyx](https://
 
 ## How it works
 
-1. On first use, the package is installed into `~/.anyx/` (a private npm workspace).
+1. On first use, the package is installed into `~/.npxall/` (a private npm workspace).
 2. The package is loaded via `require` or dynamic `import()` depending on its module format.
 3. Arguments are JSON-parsed where possible, falling back to strings.
 4. The result is printed to stdout as JSON (objects/arrays) or a plain string (primitives).
