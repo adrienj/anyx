@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'child_process';
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, appendFileSync } from 'fs';
 import { createRequire } from 'module';
 import { join } from 'path';
 import { homedir } from 'os';
@@ -244,11 +244,51 @@ function validatePackageName(name) {
   }
 }
 
+// ─── --setup: add shell function so bare [ ] work in zsh ─────────────────────
+
+function runSetup() {
+  const shell = process.env.SHELL ?? '';
+  const home = homedir();
+  let rcFile;
+  if (shell.includes('zsh'))       rcFile = join(home, '.zshrc');
+  else if (shell.includes('bash')) rcFile = join(home, '.bashrc');
+  else {
+    process.stderr.write('Unknown shell. Add this to your shell config manually:\n');
+    process.stderr.write("  npxall() { noglob npx npxall \"$@\"; }\n");
+    process.exit(0);
+  }
+
+  const marker = '# added by npxall --setup';
+  let existing = '';
+  try { existing = readFileSync(rcFile, 'utf8'); } catch {}
+
+  if (existing.includes(marker)) {
+    process.stdout.write(`Shell function already present in ${rcFile}\n`);
+    process.stdout.write(`Reload with: source ${rcFile}\n`);
+    process.exit(0);
+  }
+
+  // In bash, [  ] don't cause glob issues so a plain passthrough is fine.
+  const fn = shell.includes('zsh')
+    ? `npxall() { noglob npx npxall "$@"; }`
+    : `npxall() { npx npxall "$@"; }`;
+
+  appendFileSync(rcFile, `\n${marker}\n${fn}\n`);
+  process.stdout.write(`Added shell function to ${rcFile}\n`);
+  process.stdout.write(`Run: source ${rcFile}\n`);
+  process.stdout.write(`Then use brackets without quoting:\n`);
+  process.stdout.write(`  npxall lodash cloneDeep [ lodash omit '{"a":1,"b":2}' b ]\n`);
+  process.exit(0);
+}
+
 const [packageName, ...rawRest] = process.argv.slice(2);
 
+if (packageName === '--setup') runSetup();
+
 if (!packageName) {
-  process.stderr.write('Usage: anyx <package> [initial] [. method [args...]]...\n');
-  process.stderr.write('       anyx <package> method [ pkg2 method2 args... ] ...args\n');
+  process.stderr.write('Usage: npxall <package> [method] [args...]\n');
+  process.stderr.write('       npxall <package> method [ pkg2 method2 args... ]\n');
+  process.stderr.write('       npxall --setup   (enable bare [ ] brackets in your shell)\n');
   process.exit(1);
 }
 
