@@ -8,9 +8,9 @@
 **Run any npm function directly from the command line — without writing a script.**
 
 ```bash
-npx runany lodash camelCase "hello world"   # → helloWorld
-npx runany ms 2000                          # → 2s
-npx runany change-case snakeCase "Foo Bar"  # → foo_bar
+npx npxall lodash camelCase "hello world"   # → helloWorld
+npx npxall ms 2000                          # → 2s
+npx npxall change-case snakeCase "Foo Bar"  # → foo_bar
 ```
 
 Packages are downloaded on first use and cached in `~/.anyx/`. No global installs, no boilerplate.
@@ -20,10 +20,10 @@ Packages are downloaded on first use and cached in `~/.anyx/`. No global install
 ## Install
 
 ```bash
-npm install -g runany
+npm install -g npxall
 ```
 
-Or use without installing via `npx runany <package> ...`.
+Or use without installing via `npx npxall <package> ...`.
 
 ---
 
