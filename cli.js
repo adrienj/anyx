@@ -81,6 +81,50 @@ function makeParseArg(stdin) {
   };
 }
 
+// ─── Shell string tokenizer (for quoted subexpressions) ──────────────────────
+
+// Tokenize a string the way a shell would, respecting single/double quotes.
+// Used to parse '[ pkg method args... ]' passed as a single quoted shell word.
+function tokenizeShell(s) {
+  const tokens = [];
+  let i = 0;
+  while (i < s.length) {
+    while (i < s.length && /\s/.test(s[i])) i++;
+    if (i >= s.length) break;
+    let token = '';
+    if (s[i] === '"') {
+      i++;
+      while (i < s.length && s[i] !== '"') {
+        if (s[i] === '\\' && i + 1 < s.length) { i++; token += s[i]; }
+        else token += s[i];
+        i++;
+      }
+      i++;
+    } else if (s[i] === "'") {
+      i++;
+      while (i < s.length && s[i] !== "'") token += s[i++];
+      i++;
+    } else {
+      while (i < s.length && !/\s/.test(s[i])) token += s[i++];
+    }
+    if (token) tokens.push(token);
+  }
+  return tokens;
+}
+
+// Detect a quoted subexpression string like '[ pkg method args ]'.
+// Returns inner token array, or null if not a subexpr string.
+function tryParseSubexprString(token) {
+  if (typeof token !== 'string') return null;
+  const t = token.trim();
+  if (!t.startsWith('[') || !t.endsWith(']')) return null;
+  // Valid JSON arrays like [1,2,3] are NOT subexpressions.
+  try { JSON.parse(t); return null; } catch {}
+  const inner = t.slice(1, -1).trim();
+  if (!inner) return null;
+  return tokenizeShell(inner);
+}
+
 // ─── Token grouping ──────────────────────────────────────────────────────────
 
 // Group [ ... ] spans into subexpr objects: { subexpr: string[] }
@@ -90,6 +134,7 @@ function groupSubExpressions(tokens) {
   let i = 0;
   while (i < tokens.length) {
     if (tokens[i] === '[') {
+      // Unquoted form: [ pkg method args ]
       let depth = 1, j = i + 1;
       while (j < tokens.length && depth > 0) {
         if (tokens[j] === '[') depth++;
@@ -99,7 +144,13 @@ function groupSubExpressions(tokens) {
       result.push({ subexpr: tokens.slice(i + 1, j - 1) });
       i = j;
     } else {
-      result.push(tokens[i]);
+      // Quoted form: '[ pkg method args ]' passed as a single shell word
+      const inner = tryParseSubexprString(tokens[i]);
+      if (inner !== null) {
+        result.push({ subexpr: inner });
+      } else {
+        result.push(tokens[i]);
+      }
       i++;
     }
   }
