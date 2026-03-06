@@ -6,6 +6,9 @@
   "bin": {
     "anyx": "./cli.js"
   },
+  "files": [
+    "cli.js"
+  ],
   "scripts": {
     "test": "vitest run"
   },
