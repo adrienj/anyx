@@ -16,10 +16,14 @@ function escHtml(s: string): string {
 // ── Terminal demo ─────────────────────────────────────────────────────────────
 
 const DEMOS: Array<{ cmd: string; result: string }> = [
-  { cmd: 'npx npxall ms 86400000',                                  result: '1d'           },
-  { cmd: 'npxall change-case camelCase "hello world"',              result: 'helloWorld'   },
-  { cmd: "npxall lodash chunk '[1,2,3,4,5,6]' 2",                  result: '[[1,2],[3,4],[5,6]]' },
-  { cmd: 'npx npxall lodash "foo bar" . split " " . reverse . join "-"', result: 'bar-foo' },
+  { cmd: 'npxall pretty-bytes 1073741824',                                    result: '1 GB'             },
+  { cmd: 'npxall change-case camelCase "hello world"',                        result: 'helloWorld'       },
+  { cmd: 'npxall validator isEmail "user@example.com"',                       result: 'true'             },
+  { cmd: "npxall lodash chunk '[1,2,3,4,5,6]' 2",                            result: '[[1,2],[3,4],[5,6]]' },
+  { cmd: 'npxall mathjs evaluate "sqrt(144)"',                                result: '12'               },
+  { cmd: 'npxall semver satisfies "1.5.0" "^1.0.0"',                         result: 'true'             },
+  { cmd: 'npxall slugify "Hello World! 2024" \'{"lower":true,"strict":true}\'', result: 'hello-world-2024' },
+  { cmd: 'npxall lodash "foo bar" . split " " . reverse . join "-"',          result: 'bar-foo'          },
 ];
 
 async function startTerminalDemo(): Promise<void> {
@@ -115,11 +119,14 @@ function landingHtml(): string {
       <div class="ex-section">
         <h2 class="section-heading">One command. Any function.</h2>
         <div class="ex-grid">
-          ${exCard('String case',     'npx npxall change-case camelCase "hello world"',             'helloWorld')}
-          ${exCard('Time conversion', 'npx npxall ms 86400000',                                     '1d')}
-          ${exCard('Array split',     "npx npxall lodash chunk '[1,2,3,4]' 2",                      '[[1,2],[3,4]]')}
-          ${exCard('Method chaining', 'npxall lodash "foo bar" . split " " . reverse . join "-"',   'bar-foo')}
-          ${exCard('Stdin piping',    'echo "hello world" | npxall change-case pascalCase -',       'HelloWorld')}
+          ${exCard('Format file size',   'npxall pretty-bytes 1073741824',                                       '1 GB')}
+          ${exCard('Validate email',     'npxall validator isEmail "user@example.com"',                          'true')}
+          ${exCard('Parse YAML',         "npxall yaml parse 'host: localhost\\nport: 5432'",                     '{"host":"localhost","port":5432}')}
+          ${exCard('Compute math',       'npxall mathjs evaluate "2^10 + sqrt(144)"',                            '1036')}
+          ${exCard('URL-safe slug',      "npxall slugify \"Hello World! 2024\" '{\"lower\":true,\"strict\":true}'", 'hello-world-2024')}
+          ${exCard('Check semver range', 'npxall semver satisfies "1.5.0" "^1.0.0"',                             'true')}
+          ${exCard('Method chaining',    'npxall lodash "foo bar" . split " " . reverse . join "-"',             'bar-foo')}
+          ${exCard('Stdin piping',       'echo "Hello World" | npxall change-case snakeCase -',                  'hello_world')}
         </div>
       </div>
 

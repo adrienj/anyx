@@ -40,5 +40,5 @@ function argForParam(p: ParamInfo): string {
 
 export function buildCliString(pkg: string, fn: string, params: ParamInfo[]): string {
   const args = params.filter(p => !p.optional).map(argForParam);
-  return `anyx ${pkg} ${fn}${args.length ? ' ' + args.join(' ') : ''}`;
+  return `npxall ${pkg} ${fn}${args.length ? ' ' + args.join(' ') : ''}`;
 }
