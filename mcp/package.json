@@ -1,0 +1,23 @@
+{
+  "name": "npxall-mcp",
+  "version": "0.1.0",
+  "description": "MCP server — call any npm function from your LLM",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "express": "^4.18.2",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.0"
+  }
+}

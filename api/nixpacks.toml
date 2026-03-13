@@ -1,0 +1,6 @@
+[build]
+cmd = "npm install"
+
+[start]
+cmd = "node server.js"
+port = 3000

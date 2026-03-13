@@ -5,3 +5,19 @@ dist/
 .env.*
 *.log
 npm-debug.log*
+
+# Cache directories
+.npxall/
+api/cache/
+
+# Private dev (local overrides)
+dev/
+
+# Docker
+docker-compose.override.yml
+/.idea/
+
+# Claude Code (never version)
+CLAUDE.md
+.claude/
+docs/superpowers/

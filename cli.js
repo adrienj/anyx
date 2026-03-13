@@ -72,13 +72,136 @@ async function readStdin() {
   return Buffer.concat(chunks).toString().trim();
 }
 
+// ─── Double-dash args: --key=value or --key value → {key: value} ─────────────
+
+function parseDoubleDashArgs(tokens) {
+  const result = [];
+  let i = 0;
+  while (i < tokens.length) {
+    const token = tokens[i];
+    if (token === '--') {
+      // Bare -- means stdin JSON
+      result.push(token);
+      i++;
+      continue;
+    }
+    if (typeof token === 'string' && token.startsWith('--')) {
+      const eqIdx = token.indexOf('=');
+      if (eqIdx !== -1) {
+        // --key=value form
+        const key = token.slice(2, eqIdx);
+        const value = token.slice(eqIdx + 1);
+        result.push({ __dblDash: true, [key]: parseValue(value) });
+      } else {
+        // --key value form (next token is the value, not a flag)
+        const key = token.slice(2);
+        const next = tokens[i + 1];
+        if (next !== undefined && !next.startsWith('--')) {
+          result.push({ __dblDash: true, [key]: parseValue(next) });
+          i++;
+        } else {
+          // Boolean flag: --flag → {flag: true}
+          result.push({ __dblDash: true, [key]: true });
+        }
+      }
+      i++;
+      continue;
+    }
+    result.push(token);
+    i++;
+  }
+  return result;
+}
+
+// Parse a value: try JSON, then comma-separated array, then string
+function parseValue(val) {
+  // Try JSON first
+  try { return JSON.parse(val); } catch {}
+  // Try comma-separated array
+  if (val.includes(',')) {
+    const parts = val.split(',').map(p => p.trim()).filter(p => p !== '');
+    if (parts.length > 1) {
+      // Try to parse each part as JSON, fall back to string
+      return parts.map(p => {
+        try { return JSON.parse(p); } catch { return p; }
+      });
+    }
+  }
+  // Fall back to string
+  return val;
+}
+
+// Merge multiple --flag objects into a single object
+// Handles: [method, --flag1, --flag2] → [method, {flag1, flag2}]
+// Or: [--flag1, --flag2] → [{flag1, flag2}] (if no method name)
+function mergeDoubleDashArgs(tokens) {
+  if (tokens.length === 0) return tokens;
+  
+  // Find where the dbl-dash tokens start
+  // First, check if FIRST token is already a dbl-dash object
+  if (typeof tokens[0] === 'object' && tokens[0].__dblDash) {
+    // All tokens are --flags, merge them all
+    const merged = {};
+    for (const token of tokens) {
+      if (typeof token === 'object' && token.__dblDash) {
+        Object.assign(merged, token);
+      }
+    }
+    delete merged.__dblDash;
+    return Object.keys(merged).length > 0 ? [merged] : tokens;
+  }
+  
+  // First token is NOT a dbl-dash (likely method name)
+  // Look for dbl-dash tokens after the method name
+  let dblDashStart = -1;
+  for (let i = 1; i < tokens.length; i++) {
+    if (typeof tokens[i] === 'object' && tokens[i].__dblDash) {
+      dblDashStart = i;
+      break;
+    }
+  }
+  
+  if (dblDashStart === -1) {
+    // No dbl-dash tokens found
+    return tokens;
+  }
+  
+  // Merge the dbl-dash tokens into a single object
+  const methodName = tokens[0];
+  const dblDashTokens = tokens.slice(dblDashStart);
+  
+  const merged = {};
+  for (const token of dblDashTokens) {
+    if (typeof token === 'object' && token.__dblDash) {
+      Object.assign(merged, token);
+    }
+  }
+  delete merged.__dblDash;
+  
+  if (Object.keys(merged).length > 0) {
+    return [methodName, merged];
+  }
+  return tokens;
+}
+
 function makeParseArg(stdin) {
   return function parseArg(token) {
     if (token === '-') {
       if (stdin === null) { process.stderr.write('Error: - used but no stdin\n'); process.exit(1); }
       try { return JSON.parse(stdin); } catch { return stdin; }
     }
-    try { return JSON.parse(token); } catch { return token; }
+    // Try JSON first
+    try { return JSON.parse(token); } catch {}
+    // Try comma-separated array
+    if (typeof token === 'string' && token.includes(',')) {
+      const parts = token.split(',').map(p => p.trim()).filter(p => p !== '');
+      if (parts.length > 1) {
+        return parts.map(p => {
+          try { return JSON.parse(p); } catch { return p; }
+        });
+      }
+    }
+    return token;
   };
 }
 
@@ -287,10 +410,41 @@ const [packageName, ...rawRest] = process.argv.slice(2);
 if (packageName === '--setup') runSetup();
 
 if (!packageName) {
-  process.stderr.write('Usage: npxall <package> [method] [args...]\n');
-  process.stderr.write('       npxall <package> method [ pkg2 method2 args... ]\n');
-  process.stderr.write('       npxall --setup   (enable bare [ ] brackets in your shell)\n');
-  process.exit(1);
+  process.stdout.write(`
+npxall — run any npm function from the command line.
+Never write a one-off script again. (Limitations apply. Not valid in production. Consult your architect.)
+
+Usage:
+  npxall <package> [method] [args...]
+
+Examples:
+  npxall ms 60000                               → 1m
+  npxall semver valid "1.2.3"                   → 1.2.3
+  npxall lodash camelCase "hello world"         → helloWorld
+  npxall pretty-bytes 1073741824                → 1 GB
+  npxall uuid v4                                → 550e8400-...
+  npxall slugify "Hello World" '{"lower":true}' → hello-world
+  npxall yaml parse "key: value"                → {"key":"value"}
+
+Features:
+  Method chaining      npxall lodash "foo bar" . split " " . reverse . join "-"
+  Dot shorthand        npxall lodash camelCase.toUpper "hello world"
+  Sub-expressions      npxall lodash cloneDeep '[ lodash omit {"a":1,"b":2} "b" ]'
+  Stdin                echo '"hello"' | npxall lodash camelCase -
+  Shell substitution   npxall yaml parse "$(cat config.yaml)"
+  Double-dash args     npxall lodash pick --obj='{"a":1}' --paths=a
+  Comma arrays         npxall lodash uniq 1,2,3,2,1
+
+Shell setup (enables bare [ ] brackets):
+  npxall --setup
+
+REST API:
+  https://api.npxall.com/<package>/<method>?key=value
+  POST https://api.npxall.com/<package>/<method>  (JSON body as args)
+
+Docs: https://npxall.com
+`);
+  process.exit(0);
 }
 
 validatePackageName(packageName);
@@ -303,8 +457,20 @@ const mod = raw?.default ?? raw;
 const needsStdin = rawRest.includes('-');
 const stdin = needsStdin ? await readStdin() : null;
 
+// Pre-process double-dash args: --key=value → {key: value}
+const processedRest = parseDoubleDashArgs(rawRest);
+
+// If all args were --flags, merge them into a single object argument
+const maybeMerged = mergeDoubleDashArgs(processedRest);
+
+// Check if merge happened: last element is the merged object (and we have more than just the merged object)
+const lastIsMerged = maybeMerged.length > 0 && typeof maybeMerged[maybeMerged.length - 1] === 'object' && !Array.isArray(maybeMerged[maybeMerged.length - 1]);
+const finalRest = lastIsMerged && maybeMerged.length !== 1
+  ? maybeMerged  // Merge happened, use merged result
+  : processedRest;
+
 // Group sub-expressions, expand shorthands, split by dot
-const grouped = groupSubExpressions(rawRest);
+const grouped = groupSubExpressions(finalRest);
 const segments = splitByDot(expandShorthands(grouped));
 const isChained = segments.length > 1;
 

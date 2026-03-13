@@ -218,10 +218,11 @@ function runRaw(...args) {
 }
 
 describe('error handling', () => {
-  it('no args → exit 1 with usage message', () => {
+  it('no args → exit 0 with help', () => {
     const r = runRaw();
-    expect(r.status).toBe(1);
-    expect(r.stderr).toContain('Usage:');
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('npxall');
+    expect(r.stdout).toContain('Usage:');
   });
 
   it('invalid package name (path traversal) → exit 1', () => {
@@ -532,4 +533,92 @@ describe(`shell $(cat file) — ${PWSH ?? 'pwsh (not installed)'}`, () => {
 describe('shell $(cat file) — unsupported shells', () => {
   it.skip('fish: use (cat file | string collect) instead of $(cat file)');
   it.skip('cmd.exe: no substitution support — use Git Bash, WSL, or PowerShell');
+});
+
+// ─── double-dash arguments ──────────────────────────────────────────────────
+describe('double-dash arguments', () => {
+  it('--key=value creates object', () =>
+    expect(json('lodash', 'keys', '--a=1', '--b=2')).toEqual(['a', 'b']));
+
+  it('--key=json-object', () =>
+    expect(json('lodash', 'keys', '--a={"x":1}', '--b=2')).toEqual(['a', 'b']));
+
+  it('method with --flags as object arg', () => {
+    // lodash.defaults({}, {a:1,b:2}) → {a:1,b:2}
+    const result = json('lodash', 'defaults', '{}', '--a=1', '--b=2');
+    expect(result).toEqual({a:1,b:2});
+  });
+
+  it('--key value (space-separated) creates object', () =>
+    expect(json('lodash', 'keys', '--a', '1', '--b', '2')).toEqual(['a', 'b']));
+
+  it('--key value space form passes values to method', () => {
+    const result = json('lodash', 'defaults', '{}', '--x', '10', '--y', '20');
+    expect(result).toEqual({x: 10, y: 20});
+  });
+});
+
+// ─── comma-separated arrays (CLI) ────────────────────────────────────────────
+describe('comma-separated arrays (CLI)', () => {
+  it('numeric comma array', () =>
+    expect(json('lodash', 'sum', '1,2,3,4,5')).toBe(15));
+
+  it('string comma array', () =>
+    expect(json('lodash', 'uniq', 'a,b,c,a')).toEqual(['a', 'b', 'c']));
+
+  it('single value without comma stays string', () =>
+    expect(run('lodash', 'camelCase', 'hello world')).toBe('helloWorld'));
+});
+
+// ─── deep chaining (4+ steps) ────────────────────────────────────────────────
+describe('deep chaining (4+ steps)', () => {
+  it('range → chunk → flatten → uniq (4 steps)', () =>
+    expect(json('lodash', '.', 'range', '8', '.', 'chunk', '2', '.', 'flatten', '.', 'uniq'))
+      .toEqual(_.uniq(_.flatten(_.chunk(_.range(8), 2)))));
+
+  it('range → reverse → chunk → head (4 steps)', () =>
+    expect(json('lodash', '.', 'range', '6', '.', 'reverse', '.', 'chunk', '2', '.', 'head'))
+      .toEqual(_.head(_.chunk(_.reverse(_.range(6)), 2))));
+
+  it('concat → flatten → uniq → reverse → head (5 steps)', () =>
+    expect(json('lodash', '[1,2]', '.', 'concat', '[2,3]', '.', 'flatten', '.', 'uniq', '.', 'reverse', '.', 'head'))
+      .toBe(_.head(_.reverse(_.uniq(_.flatten(_.concat([1,2], [2,3])))))));
+});
+
+// ─── triple-nested sub-expressions ───────────────────────────────────────────
+describe('triple-nested sub-expressions', () => {
+  it('head of uniq of flatten of concat', () =>
+    expect(json('lodash', 'head',
+      '[', 'lodash', 'uniq',
+        '[', 'lodash', 'flatten',
+          '[', 'lodash', 'concat', '[1,1]', '[2,2]', ']',
+        ']',
+      ']'))
+      .toBe(_.head(_.uniq(_.flatten(_.concat([1,1], [2,2]))))));
+});
+
+// ─── additional error cases ──────────────────────────────────────────────────
+describe('additional error cases', () => {
+  it('method that throws → exit 1', () => {
+    const r = runRaw('semver', 'major', '"not-a-version"');
+    expect(r.status).toBe(1);
+  });
+
+  it('empty string package → shows help', () => {
+    const r = runRaw('');
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('Usage:');
+  });
+
+  it('non-existent npm package → exit 1 with install error', () => {
+    const r = runRaw('this-package-does-not-exist-xyz-123abc');
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('this-package-does-not-exist-xyz-123abc');
+  });
+
+  it('invalid package name (shell injection attempt) → exit 1', () => {
+    const r = runRaw('lodash; echo pwned');
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('invalid package name');
+  });
 });
