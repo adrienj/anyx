@@ -10,7 +10,7 @@
     "cli.js"
   ],
   "scripts": {
-    "test": "vitest run --exclude 'api/**' --exclude 'mcp/**'"
+    "test": "vitest run"
   },
   "keywords": [
     "cli",
