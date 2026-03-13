@@ -10,7 +10,7 @@
     "cli.js"
   ],
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run test/"
   },
   "keywords": [
     "cli",
