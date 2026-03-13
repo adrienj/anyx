@@ -101,6 +101,8 @@ function landingHtml(): string {
         <span class="feat-badge">Cached locally</span>
         <span class="feat-badge">Pipe-friendly</span>
         <span class="feat-badge">Method chaining</span>
+        <span class="feat-badge">REST API</span>
+        <span class="feat-badge">MCP Server</span>
       </div>
 
       <div class="install-strip">
@@ -154,6 +156,90 @@ function landingHtml(): string {
               <div class="step-desc">JSON for objects, plain text for primitives. Pipe it anywhere.</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="api-section">
+        <h2 class="section-heading">REST API v2 <span class="api-wink">— URL pipelines</span></h2>
+        <p class="api-desc">
+          Call any npm function over HTTP. Chain multiple operations in a single URL —
+          each step's result feeds into the next. No query params, no body needed.
+          <em>Disclaimer: won't replace your actual backend. Probably.</em>
+        </p>
+        <div class="api-examples">
+          <div class="api-example">
+            <div class="api-method get">GET</div>
+            <pre class="api-cmd">api.npxall.com/ms/60000</pre>
+            <div class="api-result">→ "1m"</div>
+          </div>
+          <div class="api-example">
+            <div class="api-method get">GET</div>
+            <pre class="api-cmd">api.npxall.com/lodash/camelCase/hello%20world</pre>
+            <div class="api-result">→ "helloWorld"</div>
+          </div>
+          <div class="api-example">
+            <div class="api-method get">GET</div>
+            <pre class="api-cmd">api.npxall.com/lodash/chunk/[1,2,3,4],2</pre>
+            <div class="api-result">→ [[1,2],[3,4]]</div>
+          </div>
+          <div class="api-example chain-highlight">
+            <div class="api-method get">GET</div>
+            <pre class="api-cmd">api.npxall.com/lodash/concat/[1,2],3/reverse.slice/0,1/</pre>
+            <div class="api-result">→ [3]  <span class="api-chain-note">chained: concat → reverse → slice</span></div>
+          </div>
+          <div class="api-example">
+            <div class="api-method post">POST</div>
+            <pre class="api-cmd">api.npxall.com/lodash/pick  body: [{"a":1,"b":2,"c":3}, ["a","c"]]</pre>
+            <div class="api-result">→ {"a":1,"c":3}</div>
+          </div>
+        </div>
+        <div class="api-example chain-highlight">
+            <div class="api-method get">GET</div>
+            <pre class="api-cmd">api.npxall.com/lodash/keys/{"a":1,"b":2}/reverse.join/-/</pre>
+            <div class="api-result">→ "b-a"  <span class="api-chain-note">prototype methods: keys → reverse → join</span></div>
+          </div>
+        </div>
+        <div class="api-endpoints">
+          <div class="api-endpoint-row"><code>GET /pkg/method/args/method/args/...</code><span>pipeline URL</span></div>
+          <div class="api-endpoint-row"><code>POST /pkg/method</code><span>JSON array body as args</span></div>
+          <div class="api-endpoint-row"><code>GET /@org/pkg/method/args</code><span>scoped packages</span></div>
+          <div class="api-endpoint-row"><code>method.method</code><span>dot shorthand — chain no-arg calls</span></div>
+          <div class="api-endpoint-row"><code>.reverse .join .toUpperCase .split</code><span>JS prototype methods work on results</span></div>
+          <div class="api-endpoint-row"><code>20s exec / 60s install</code><span>timeouts prevent runaway requests</span></div>
+        </div>
+      </div>
+
+      <div class="mcp-section">
+        <h2 class="section-heading">MCP Server <span class="mcp-tag">for Claude, Cursor, etc.</span></h2>
+        <p class="api-desc">
+          Use npxall as an MCP tool — call any npm function directly from your AI assistant.
+          One tool, every package. No setup required.
+        </p>
+        <div class="mcp-examples">
+          <div class="mcp-example">
+            <div class="mcp-label">Convert time</div>
+            <pre class="mcp-code">{ "package": "ms", "args": [3600000] }</pre>
+            <div class="mcp-result">→ "1h"</div>
+          </div>
+          <div class="mcp-example">
+            <div class="mcp-label">Chunk array</div>
+            <pre class="mcp-code">{ "package": "lodash", "method": "chunk", "args": [[1,2,3,4,5,6], 2] }</pre>
+            <div class="mcp-result">→ [[1,2],[3,4],[5,6]]</div>
+          </div>
+          <div class="mcp-example">
+            <div class="mcp-label">Validate email</div>
+            <pre class="mcp-code">{ "package": "validator", "method": "isEmail", "args": ["user@test.com"] }</pre>
+            <div class="mcp-result">→ true</div>
+          </div>
+          <div class="mcp-example">
+            <div class="mcp-label">Generate UUID</div>
+            <pre class="mcp-code">{ "package": "uuid", "method": "v4" }</pre>
+            <div class="mcp-result">→ "f47ac10b-58cc-..."</div>
+          </div>
+        </div>
+        <div class="mcp-config">
+          <div class="mcp-config-label">Add to your MCP client config:</div>
+          <pre class="mcp-config-code">{ "mcpServers": { "npxall": { "url": "https://mcp.npxall.com/mcp" } } }</pre>
         </div>
       </div>
 
