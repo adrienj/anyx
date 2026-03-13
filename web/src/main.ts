@@ -279,7 +279,7 @@ function attachLanding() {
 function searchHtml(value = '') {
   return `
     <header>
-      <a class="logo" href="/npxall/" aria-label="npxall home">npxall</a>
+      <a class="logo" href="/" aria-label="npxall home">npxall</a>
       <p class="tagline">Run any npm function from the command line</p>
       <form id="search" class="search-wrap">
         <input name="pkg" value="${escHtml(value)}" placeholder="lodash, semver, ms, change-case…" autocomplete="off" autofocus />

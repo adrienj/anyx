@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
-  base: '/npxall/',
+  base: '/',
   build: { outDir: 'dist' },
   test: { testTimeout: 15000 },
 });
