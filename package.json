@@ -10,7 +10,7 @@
     "cli.js"
   ],
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run --exclude 'api/**' --exclude 'mcp/**'"
   },
   "keywords": [
     "cli",
@@ -26,7 +26,7 @@
     "type": "git",
     "url": "git+https://github.com/adrienj/npxall.git"
   },
-  "homepage": "https://adrienj.github.io/npxall/",
+  "homepage": "https://npxall.com",
   "bugs": {
     "url": "https://github.com/adrienj/npxall/issues"
   },

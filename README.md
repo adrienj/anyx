@@ -1,9 +1,11 @@
 # npxall
 
+[![npm](https://img.shields.io/npm/v/npxall)](https://www.npmjs.com/package/npxall)
+[![npm downloads](https://img.shields.io/npm/dw/npxall)](https://www.npmjs.com/package/npxall)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![CI](https://github.com/adrienj/npxall/actions/workflows/ci.yml/badge.svg)](https://github.com/adrienj/npxall/actions/workflows/ci.yml)
-[![Web UI](https://img.shields.io/badge/web-adrienj.github.io%2Fnpxall-blue)](https://adrienj.github.io/npxall/)
+[![Web](https://img.shields.io/badge/web-npxall.com-blue)](https://npxall.com)
 
 **Run any npm function directly from the command line — without writing a script.**
 
