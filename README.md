@@ -163,7 +163,7 @@ npxall lodash uniq a,b,c,a
 
 ---
 
-## REST API v2
+## REST API
 
 **Base URL:** `https://api.npxall.com`
 
@@ -260,12 +260,6 @@ Single `call` tool with parameters:
 { "package": "lodash", "method": "camelCase", "args": ["hello world"] }  → "helloWorld"
 { "package": "uuid", "method": "v4" }                      → "550e8400-..."
 ```
-
----
-
-## Web UI
-
-Browse exported functions for any package at **[adrienj.github.io/npxall](https://adrienj.github.io/npxall/)** — type a package name and see every function with its signature, description, and ready-to-run CLI example.
 
 ---
 
