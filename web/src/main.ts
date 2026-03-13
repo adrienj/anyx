@@ -1,6 +1,3 @@
-import { lookup } from './lookup';
-import type { FnDoc } from './lookup';
-
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
@@ -16,14 +13,17 @@ function escHtml(s: string): string {
 // ── Terminal demo ─────────────────────────────────────────────────────────────
 
 const DEMOS: Array<{ cmd: string; result: string }> = [
+  // CLI
   { cmd: 'npxall pretty-bytes 1073741824',                                    result: '1 GB'             },
   { cmd: 'npxall change-case camelCase "hello world"',                        result: 'helloWorld'       },
   { cmd: 'npxall validator isEmail "user@example.com"',                       result: 'true'             },
   { cmd: "npxall lodash chunk '[1,2,3,4,5,6]' 2",                            result: '[[1,2],[3,4],[5,6]]' },
-  { cmd: 'npxall mathjs evaluate "sqrt(144)"',                                result: '12'               },
-  { cmd: 'npxall semver satisfies "1.5.0" "^1.0.0"',                         result: 'true'             },
-  { cmd: 'npxall slugify "Hello World! 2024" \'{"lower":true,"strict":true}\'', result: 'hello-world-2024' },
   { cmd: 'npxall lodash "foo bar" . split " " . reverse . join "-"',          result: 'bar-foo'          },
+  // API
+  { cmd: 'curl api.npxall.com/ms/60000',                                      result: '"1m"'             },
+  { cmd: 'curl api.npxall.com/lodash/camelCase/hello%20world',                result: '"helloWorld"'     },
+  { cmd: 'curl api.npxall.com/lodash/chunk/%5B1,2,3,4%5D,2',                 result: '[[1,2],[3,4]]'    },
+  { cmd: 'curl api.npxall.com/lodash/concat/%5B1,2%5D,3/reverse/',           result: '[3,2,1]'          },
 ];
 
 async function startTerminalDemo(): Promise<void> {
@@ -36,7 +36,8 @@ async function startTerminalDemo(): Promise<void> {
 
     const line = document.createElement('div');
     line.className = 'tl';
-    line.innerHTML = '<span class="tp">%</span><span class="tc"></span><span class="tk">▋</span>';
+    // Safe: static HTML with no user input
+    line.innerHTML = '<span class="tp">%</span><span class="tc"></span><span class="tk">&#x2588;</span>';
     body.appendChild(line);
     body.scrollTop = body.scrollHeight;
 
@@ -77,9 +78,16 @@ function exCard(label: string, cmd: string, result: string): string {
   `;
 }
 
+// All template content below is static/hardcoded — no user input flows into innerHTML.
+// The escHtml helper is used as defense-in-depth on hardcoded strings.
 function landingHtml(): string {
   return `
     <section class="landing">
+
+      <header>
+        <a class="logo" href="/">npxall</a>
+        <p class="tagline">Run any npm function from the command line</p>
+      </header>
 
       <div class="term-window">
         <div class="term-bar">
@@ -92,7 +100,7 @@ function landingHtml(): string {
       </div>
 
       <div class="syntax-note">
-        Use <code>npx npxall</code> without installing — or <code>npm install -g npxall</code> for the short form <code>npxall</code>
+        Use <code>npx npxall</code> without installing &mdash; or <code>npm install -g npxall</code> for the short form <code>npxall</code>
       </div>
 
       <div class="feat-row">
@@ -139,7 +147,7 @@ function landingHtml(): string {
             <div class="step-n">1</div>
             <div class="step-body">
               <div class="step-title">Type a package and function</div>
-              <div class="step-desc">Any of 2 million packages on npm — no script, no boilerplate.</div>
+              <div class="step-desc">Any of 2 million packages on npm &mdash; no script, no boilerplate.</div>
             </div>
           </div>
           <div class="step">
@@ -160,50 +168,48 @@ function landingHtml(): string {
       </div>
 
       <div class="api-section">
-        <h2 class="section-heading">REST API v2 <span class="api-wink">— URL pipelines</span></h2>
+        <h2 class="section-heading">REST API <span class="api-wink">&mdash; URL pipelines</span></h2>
         <p class="api-desc">
-          Call any npm function over HTTP. Chain multiple operations in a single URL —
+          Call any npm function over HTTP. Chain multiple operations in a single URL &mdash;
           each step's result feeds into the next. No query params, no body needed.
-          <em>Disclaimer: won't replace your actual backend. Probably.</em>
         </p>
         <div class="api-examples">
           <div class="api-example">
             <div class="api-method get">GET</div>
             <pre class="api-cmd">api.npxall.com/ms/60000</pre>
-            <div class="api-result">→ "1m"</div>
+            <div class="api-result">&rarr; "1m"</div>
           </div>
           <div class="api-example">
             <div class="api-method get">GET</div>
             <pre class="api-cmd">api.npxall.com/lodash/camelCase/hello%20world</pre>
-            <div class="api-result">→ "helloWorld"</div>
+            <div class="api-result">&rarr; "helloWorld"</div>
           </div>
           <div class="api-example">
             <div class="api-method get">GET</div>
             <pre class="api-cmd">api.npxall.com/lodash/chunk/[1,2,3,4],2</pre>
-            <div class="api-result">→ [[1,2],[3,4]]</div>
+            <div class="api-result">&rarr; [[1,2],[3,4]]</div>
           </div>
           <div class="api-example chain-highlight">
             <div class="api-method get">GET</div>
             <pre class="api-cmd">api.npxall.com/lodash/concat/[1,2],3/reverse.slice/0,1/</pre>
-            <div class="api-result">→ [3]  <span class="api-chain-note">chained: concat → reverse → slice</span></div>
+            <div class="api-result">&rarr; [3]  <span class="api-chain-note">chained: concat &rarr; reverse &rarr; slice</span></div>
           </div>
           <div class="api-example">
             <div class="api-method post">POST</div>
             <pre class="api-cmd">api.npxall.com/lodash/pick  body: [{"a":1,"b":2,"c":3}, ["a","c"]]</pre>
-            <div class="api-result">→ {"a":1,"c":3}</div>
+            <div class="api-result">&rarr; {"a":1,"c":3}</div>
           </div>
         </div>
         <div class="api-example chain-highlight">
-            <div class="api-method get">GET</div>
-            <pre class="api-cmd">api.npxall.com/lodash/keys/{"a":1,"b":2}/reverse.join/-/</pre>
-            <div class="api-result">→ "b-a"  <span class="api-chain-note">prototype methods: keys → reverse → join</span></div>
-          </div>
+          <div class="api-method get">GET</div>
+          <pre class="api-cmd">api.npxall.com/lodash/keys/{"a":1,"b":2}/reverse.join/-/</pre>
+          <div class="api-result">&rarr; "b-a"  <span class="api-chain-note">prototype methods: keys &rarr; reverse &rarr; join</span></div>
         </div>
         <div class="api-endpoints">
           <div class="api-endpoint-row"><code>GET /pkg/method/args/method/args/...</code><span>pipeline URL</span></div>
           <div class="api-endpoint-row"><code>POST /pkg/method</code><span>JSON array body as args</span></div>
           <div class="api-endpoint-row"><code>GET /@org/pkg/method/args</code><span>scoped packages</span></div>
-          <div class="api-endpoint-row"><code>method.method</code><span>dot shorthand — chain no-arg calls</span></div>
+          <div class="api-endpoint-row"><code>method.method</code><span>dot shorthand &mdash; chain no-arg calls</span></div>
           <div class="api-endpoint-row"><code>.reverse .join .toUpperCase .split</code><span>JS prototype methods work on results</span></div>
           <div class="api-endpoint-row"><code>20s exec / 60s install</code><span>timeouts prevent runaway requests</span></div>
         </div>
@@ -212,47 +218,48 @@ function landingHtml(): string {
       <div class="mcp-section">
         <h2 class="section-heading">MCP Server <span class="mcp-tag">for Claude, Cursor, etc.</span></h2>
         <p class="api-desc">
-          Use npxall as an MCP tool — call any npm function directly from your AI assistant.
+          Use npxall as an MCP tool &mdash; call any npm function directly from your AI assistant.
           One tool, every package. No setup required.
         </p>
         <div class="mcp-examples">
           <div class="mcp-example">
             <div class="mcp-label">Convert time</div>
             <pre class="mcp-code">{ "package": "ms", "args": [3600000] }</pre>
-            <div class="mcp-result">→ "1h"</div>
+            <div class="mcp-result">&rarr; "1h"</div>
           </div>
           <div class="mcp-example">
             <div class="mcp-label">Chunk array</div>
             <pre class="mcp-code">{ "package": "lodash", "method": "chunk", "args": [[1,2,3,4,5,6], 2] }</pre>
-            <div class="mcp-result">→ [[1,2],[3,4],[5,6]]</div>
+            <div class="mcp-result">&rarr; [[1,2],[3,4],[5,6]]</div>
           </div>
           <div class="mcp-example">
             <div class="mcp-label">Validate email</div>
             <pre class="mcp-code">{ "package": "validator", "method": "isEmail", "args": ["user@test.com"] }</pre>
-            <div class="mcp-result">→ true</div>
+            <div class="mcp-result">&rarr; true</div>
           </div>
           <div class="mcp-example">
             <div class="mcp-label">Generate UUID</div>
             <pre class="mcp-code">{ "package": "uuid", "method": "v4" }</pre>
-            <div class="mcp-result">→ "f47ac10b-58cc-..."</div>
+            <div class="mcp-result">&rarr; "f47ac10b-58cc-..."</div>
           </div>
         </div>
         <div class="mcp-config">
           <div class="mcp-config-label">Add to your MCP client config:</div>
-          <pre class="mcp-config-code">{ "mcpServers": { "npxall": { "url": "https://mcp.npxall.com/mcp" } } }</pre>
+          <pre class="mcp-config-code">{
+  "mcpServers": {
+    "npxall": {
+      "url": "https://mcp.npxall.com/mcp"
+    }
+  }
+}</pre>
         </div>
-      </div>
-
-      <div class="browse-cta">
-        <span class="browse-label">Browse functions for any package</span>
-        <button class="browse-btn" id="browse-focus-btn">Try the search ↑</button>
       </div>
 
       <footer class="site-footer">
         <a href="https://github.com/adrienj/npxall" target="_blank">GitHub</a>
-        <span>·</span>
+        <span>&middot;</span>
         <a href="https://www.npmjs.com/package/npxall" target="_blank">npm</a>
-        <span>·</span>
+        <span>&middot;</span>
         <span>MIT</span>
       </footer>
 
@@ -267,111 +274,10 @@ function attachLanding() {
       setTimeout(() => { this.textContent = 'copy'; }, 1800);
     }).catch(() => {});
   });
-
-  document.getElementById('browse-focus-btn')?.addEventListener('click', () => {
-    document.querySelector<HTMLInputElement>('input[name="pkg"]')?.focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-// ── Search UI ─────────────────────────────────────────────────────────────────
-
-function searchHtml(value = '') {
-  return `
-    <header>
-      <a class="logo" href="/" aria-label="npxall home">npxall</a>
-      <p class="tagline">Run any npm function from the command line</p>
-      <form id="search" class="search-wrap">
-        <input name="pkg" value="${escHtml(value)}" placeholder="lodash, semver, ms, change-case…" autocomplete="off" autofocus />
-        <button type="submit">→</button>
-      </form>
-    </header>
-  `;
-}
-
-function cardHtml(fn: FnDoc, i: number): string {
-  const params = fn.params.map(p =>
-    `<span class="param${p.optional ? ' opt' : ''}">${escHtml(p.name)}: ${escHtml(p.type)}</span>`
-  ).join(', ');
-
-  const delay = Math.min(i * 25, 500);
-  const copyText = escHtml(fn.cliExample);
-  const retBadge = fn.returnType && fn.returnType !== 'unknown'
-    ? `<span class="ret-badge">→ ${escHtml(fn.returnType)}</span>`
-    : '';
-
-  return `
-    <div class="card" style="--delay:${delay}ms">
-      <div class="card-head">
-        <span class="fn-name">${escHtml(fn.name)}</span>
-        ${retBadge}
-      </div>
-      ${fn.doc ? `<p class="doc">${escHtml(fn.doc)}</p>` : ''}
-      <div class="sig">(${params})</div>
-      <div class="cli-block">
-        <span class="cli-prompt">›</span>
-        <pre class="cli">${copyText}</pre>
-        <button class="copy-btn" data-copy="${copyText}" type="button">copy</button>
-      </div>
-    </div>
-  `;
-}
-
-function attach() {
-  document.querySelector<HTMLAnchorElement>("a.logo")?.addEventListener("click", e => {
-    e.preventDefault();
-    history.replaceState(null, "", location.pathname);
-    app.innerHTML = searchHtml() + landingHtml();
-    attach();
-    attachLanding();
-    startTerminalDemo();
-  });
-  document.querySelector<HTMLFormElement>('#search')?.addEventListener('submit', e => {
-    e.preventDefault();
-    const pkg = (e.currentTarget as HTMLFormElement).pkg.value.trim();
-    if (pkg) run(pkg);
-  });
-}
-
-function loadingHtml(pkg: string) {
-  return `<p class="status">Loading <strong>${escHtml(pkg)}</strong><span class="dots"><span></span><span></span><span></span></span></p>`;
-}
-
-async function run(pkg: string) {
-  app.innerHTML = searchHtml(pkg) + loadingHtml(pkg);
-  attach();
-  try {
-    const fns = await lookup(pkg);
-    app.innerHTML = searchHtml(pkg)
-      + `<p class="status">${fns.length} functions — <strong>${escHtml(pkg)}</strong></p>`
-      + `<div class="grid">${fns.map((fn, i) => cardHtml(fn, i)).join('')}</div>`;
-    attach();
-    history.replaceState(null, '', `#${encodeURIComponent(pkg)}`);
-
-    app.querySelector('.grid')?.addEventListener('click', e => {
-      const btn = (e.target as Element).closest<HTMLButtonElement>('.copy-btn');
-      if (!btn) return;
-      const text = btn.dataset.copy ?? '';
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
-      }).catch(() => {});
-    });
-  } catch (e: unknown) {
-    app.innerHTML = searchHtml(pkg) + `<p class="error">${escHtml(e instanceof Error ? e.message : String(e))}</p>`;
-    attach();
-  }
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
-const hash = location.hash.slice(1);
-if (hash) {
-  run(decodeURIComponent(hash));
-} else {
-  app.innerHTML = searchHtml() + landingHtml();
-  attach();
-  attachLanding();
-  startTerminalDemo();
-}
+app.innerHTML = landingHtml();
+attachLanding();
+startTerminalDemo();
