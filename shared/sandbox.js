@@ -14,23 +14,38 @@ export function isBwrapAvailable() {
     // (e.g. Docker without proper permissions).
     const result = spawnSync('bwrap', [
       '--ro-bind', '/', '/',
-      '--unshare-net',
       '--unshare-pid',
+      '--die-with-parent',
       '--', '/bin/true',
     ], { stdio: 'pipe', timeout: 5000 });
     _bwrapAvailable = result.status === 0;
+    if (_bwrapAvailable) {
+      // Also check if --unshare-net works (requires CAP_NET_ADMIN)
+      const netResult = spawnSync('bwrap', [
+        '--ro-bind', '/', '/',
+        '--unshare-net',
+        '--unshare-pid',
+        '--die-with-parent',
+        '--', '/bin/true',
+      ], { stdio: 'pipe', timeout: 5000 });
+      _bwrapNetAvailable = netResult.status === 0;
+    }
     if (!_bwrapAvailable) {
       console.log('[sandbox] WARNING: bwrap unavailable — running without namespace isolation');
+    } else if (!_bwrapNetAvailable) {
+      console.log('[sandbox] WARNING: bwrap --unshare-net unavailable — running without network isolation');
     }
   }
   return _bwrapAvailable;
 }
 
+let _bwrapNetAvailable = false;
+
 /**
  * Execute a package function in a sandboxed subprocess.
  *
  * Uses bubblewrap (bwrap) for namespace isolation when available:
- * - No network (--unshare-net)
+ * - No network (--unshare-net) when CAP_NET_ADMIN is present
  * - No PID visibility (--unshare-pid)
  * - Read-only filesystem (--ro-bind)
  * - Sanitized environment (no secrets)
@@ -75,11 +90,13 @@ export function spawnSandboxed({ cacheDir, packageName, method, args, steps, tim
         '--ro-bind', '/', '/',
         '--tmpfs', '/tmp',
         '--proc', '/proc',
-        '--unshare-net',
         '--unshare-pid',
         '--die-with-parent',
-        '--', nodeBin, RUNNER_PATH,
       ];
+      if (_bwrapNetAvailable) {
+        cmdArgs.push('--unshare-net');
+      }
+      cmdArgs.push('--', nodeBin, RUNNER_PATH);
     } else {
       cmd = nodeBin;
       cmdArgs = [RUNNER_PATH];

@@ -12,12 +12,10 @@ RUN cd mcp && npm ci --omit=dev
 COPY shared/ ./shared/
 COPY mcp/server.js ./mcp/
 
-# Non-root user with writable cache directory
-RUN addgroup -S npxall && adduser -S npxall -G npxall \
-  && mkdir -p /app/cache \
-  && chown -R npxall:npxall /app
-
-USER npxall
+# Writable cache directory
+# Runs as root so bwrap has CAP_SYS_ADMIN for namespace isolation.
+# Docker provides the outer security boundary; bwrap provides per-request sandboxing.
+RUN mkdir -p /app/cache
 
 EXPOSE 3001
 
