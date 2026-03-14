@@ -10,6 +10,9 @@ services:
     restart: unless-stopped
     cap_add:
       - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
     deploy:
       resources:
         limits:
@@ -27,6 +30,9 @@ services:
     restart: unless-stopped
     cap_add:
       - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
     deploy:
       resources:
         limits:
