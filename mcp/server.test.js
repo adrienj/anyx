@@ -11,7 +11,7 @@ const TEST_CACHE = join(tmpdir(), `npxall-mcp-test-${process.pid}`);
 process.env.NPXALL_CACHE_DIR = TEST_CACHE;
 process.env.CACHE_MAX_MB = '100';
 
-const { app, parseValue, validatePackageName, formatResult, pkgRegistry, totalCachedMb }
+const { app, validatePackageName, formatResult, cache }
   = await import('./server.js');
 
 // ─── MCP helpers ─────────────────────────────────────────────────────────────
@@ -38,13 +38,7 @@ async function mcpPost(body) {
 
 // ─── Shared pure-function tests (same logic as API, catches drift) ────────────
 
-describe('parseValue', () => {
-  it('parses JSON number',   () => expect(parseValue('42')).toBe(42));
-  it('parses JSON boolean',  () => expect(parseValue('true')).toBe(true));
-  it('returns plain string', () => expect(parseValue('hello')).toBe('hello'));
-  it('parses comma array',   () => expect(parseValue('1,2,3')).toEqual([1, 2, 3]));
-  it('parses JSON object',   () => expect(parseValue('{"a":1}')).toEqual({ a: 1 }));
-});
+// parseValue tests moved to shared/parse.test.js
 
 describe('validatePackageName', () => {
   it('accepts lodash',         () => expect(() => validatePackageName('lodash')).not.toThrow());
@@ -205,13 +199,13 @@ describe('GET /sse', () => {
 
 describe('cache registry', () => {
   it('ms appears in registry after use', () => {
-    const entry = pkgRegistry.get('ms');
+    const entry = cache.registry.get('ms');
     expect(entry).toBeDefined();
     expect(entry.refCount).toBe(0);
   });
 
   it('totalCachedMb is within limit', () => {
-    expect(totalCachedMb()).toBeLessThanOrEqual(100);
+    expect(cache.totalCachedMb()).toBeLessThanOrEqual(100);
   });
 });
 

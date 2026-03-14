@@ -12,24 +12,26 @@ npxall lets anyone call any npm package function from the CLI, REST API, or AI a
 ## Roadmap
 
 ### Shipped
-- [x] CLI with method chaining, sub-expressions, stdin piping — v0.1.3 on npm (348 downloads last week)
-- [x] REST API v2 with URL pipeline chaining — `api.npxall.com` (live)
+- [x] CLI with method chaining, sub-expressions, stdin piping — v0.2.0 on npm
+- [x] REST API with URL pipeline chaining — `api.npxall.com` (live)
 - [x] MCP server with single `call` tool — `mcp.npxall.com` (live)
-- [x] Web docs with function browser — `adrienj.github.io/npxall`
-- [x] API v2 URL parsing: `/pkg/method/args/method/args/` pipeline format
-- [x] MCP skill file for Claude Code integration
-- [x] Test coverage: 85 API+MCP tests, 262 CLI tests
-- [x] `status.npxall.com` DNS + health endpoint (live)
-- [x] Coolify deploy fixed — root cause: app created without GitHub App source (source_id: 0). Recreated with proper github_app_uuid.
+- [x] Homepage at `npxall.com` with favicon, terminal demo (CLI + API curl examples), API and MCP docs
+- [x] CI: 8-job matrix (Linux/macOS/Windows x Node 20/22 + API + MCP) — all green
+- [x] npm v0.2.0 published (2026-03-13)
+- [x] Coolify deploy from public `adrienj/npxall` repo (private repo eliminated)
+- [x] Custom domain: npxall.com, api.npxall.com, mcp.npxall.com, status.npxall.com
+- [x] Execution timeouts (5s) and install timeouts (60s) on API/MCP
+- [x] Docker non-root containers with resource limits
+- [x] Sandboxed execution via bubblewrap (network isolation, read-only fs, PID namespace, per-package cache isolation, env sanitization, --ignore-scripts) — 2026-03-14
+- [x] Shared module extraction (parse, loader, cache, sandbox) — DRY refactor of api/mcp servers — 2026-03-14
 
 ### In Progress
 (none)
 
 ### Planned (Next)
-- [ ] Publish v0.2.0 to npm with latest CLI improvements — S
-- [ ] Build and deploy updated web docs (gh-pages with API v2 + MCP sections) — S
 - [ ] Add npxall MCP server to public MCP registries (Smithery, MCP Hub) — S, high discovery value
-- [ ] README update with API v2 and MCP usage examples — S
+- [ ] Post on Hacker News / dev communities — S, first real GTM push
+- [ ] Bot/crawler protection on API — bots installing `checkout`, `robots.txt` etc. as packages — M
 
 ### Icebox
 - [ ] Authentication / rate limiting on API — not needed until abuse appears
@@ -39,14 +41,14 @@ npxall lets anyone call any npm package function from the CLI, REST API, or AI a
 
 ## Current Focus
 
-API and MCP servers are live. Next priorities: publish npm v0.2.0, update web docs, get MCP server listed on public registries for discovery.
+Everything is shipped and live. The product works end-to-end across CLI, API, and MCP. **The bottleneck is now distribution, not features.** Priority: get the MCP server listed on public registries and do a first GTM push to developer communities.
 
 ## GTM & Marketing
-- **Launch status:** Soft launch (npm published, GitHub Pages live, API + MCP live)
-- **First users:** 348 npm downloads last week (spike on Mar 6, declining since). No known repeat users. No paying users.
+- **Launch status:** Soft launch (npm published, all endpoints live, homepage up)
+- **First users:** ~350 npm downloads/week (organic). No known repeat users. No paying users.
 - **Channels:** npm search, GitHub. No active promotion yet.
-- **Conversion funnel:** Unknown. No analytics. The web docs have a function browser but no tracking.
-- **Next GTM action:** Get listed on MCP registries (Smithery, mcp.run, etc.) — this is where AI-tool-using developers discover MCP servers. The MCP angle is the strongest growth lever.
+- **Conversion funnel:** Unknown. No analytics.
+- **Next GTM action:** Get listed on MCP registries (Smithery, mcp.run, etc.) — this is where AI-tool-using developers discover MCP servers. Then post to HN/Reddit/dev Twitter.
 
 ## Monetization
 - **Revenue today:** $0
@@ -55,16 +57,16 @@ API and MCP servers are live. Next priorities: publish npm v0.2.0, update web do
 - **Next monetization action:** None planned. Focus is on distribution and usage first. Potential future: hosted API with rate limits (free tier + paid for higher limits).
 
 ## Quality
-- **Tests:** 85 passing (API + MCP), 262 passing (CLI, with some flaky tests due to shared npm cache)
-- **Known bugs:**
-  - CLI tests have cache race conditions causing intermittent failures
+- **Tests:** 309 passing (177 CLI + 49 API + 31 MCP + 52 Shared), 0 failing
+- **CI:** All 8 jobs green (ubuntu/macos/windows x node20/22 + api + mcp) — needs shared/ job added
+- **Known bugs:** None critical
 - **Tech debt:**
-  - CLI tests share `~/.npxall/` cache directory causing flakiness — should use isolated temp dirs
-  - `npxall-private` repo is separate from public `npxall` — deployment pipeline is fragile
+  - Bot/crawler traffic polluting API cache (packages like `checkout`, `robots.txt` being installed)
 
 ## Key Decisions
-- [2026-03-13] API v2: custom URL parsing with pipeline chaining instead of Express route params — enables powerful chaining like `/lodash/concat/[1,2],3/reverse.slice/0,1/`
+- [2026-03-13] API: custom URL parsing with pipeline chaining instead of Express route params
 - [2026-03-13] Direct response format (no `{success, result}` wrapper) — cleaner for programmatic use
-- [2026-03-13] MCP server as separate service from API — different transport requirements, independent scaling
-- [2026-03-13] Claude-specific files (.claude/, CLAUDE.md, docs/superpowers/) stay unversioned — local dev aids only
-- [2026-03-13] Coolify deploy fix: app had source_id=0 (no GitHub App linked). Deleted and recreated with github_app_uuid. Root cause was NOT GitHub App authorization — the app itself was misconfigured.
+- [2026-03-13] MCP server as separate service from API — different transport requirements
+- [2026-03-13] Coolify deploy fix: source_id=0 → delete and recreate with github_app_uuid
+- [2026-03-13] Removed search bar / auto-doc generation from homepage — unreliable feature, cut it
+- [2026-03-14] Distribution > features — product is complete, focus shifts to GTM

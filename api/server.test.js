@@ -10,7 +10,7 @@ const TEST_CACHE = join(tmpdir(), `npxall-api-test-${process.pid}`);
 process.env.NPXALL_CACHE_DIR = TEST_CACHE;
 process.env.CACHE_MAX_MB = '100';
 
-const { app, splitArgs, parseUrl, parseValue, validatePackageName, pkgRegistry, totalCachedMb }
+const { app, splitArgs, parseUrl, parseValue, validatePackageName, cache }
   = await import('./server.js');
 
 // ─── splitArgs ───────────────────────────────────────────────────────────────
@@ -248,12 +248,12 @@ describe('scoped @org/package', () => {
 
 describe('cache registry', () => {
   it('ms is tracked after use', () => {
-    const entry = pkgRegistry.get('ms');
+    const entry = cache.registry.get('ms');
     expect(entry).toBeDefined();
     expect(entry.refCount).toBe(0);
   });
 
   it('totalCachedMb is within limit', () => {
-    expect(totalCachedMb()).toBeLessThanOrEqual(100);
+    expect(cache.totalCachedMb()).toBeLessThanOrEqual(100);
   });
 });

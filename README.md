@@ -217,8 +217,22 @@ curl https://api.npxall.com/lodash/camelCase/hello%20world/toUpperCase/
 | Limit | Default | Env var |
 |-------|---------|---------|
 | Install timeout | 60s | `INSTALL_TIMEOUT_MS` |
-| Execution timeout | 20s | `EXEC_TIMEOUT_MS` |
+| Execution timeout | 5s | `EXEC_TIMEOUT_MS` |
 | Cache size | 500 MB | `CACHE_MAX_MB` |
+
+### Security
+
+API and MCP execution is sandboxed:
+
+| Protection | Mechanism |
+|-----------|-----------|
+| No postinstall scripts | `npm install --ignore-scripts` |
+| No network during execution | Linux network namespace isolation |
+| Read-only filesystem | bubblewrap `--ro-bind` |
+| Process isolation | PID namespace |
+| No cross-package access | Per-package cache directories |
+| No env var leaks | Sanitized environment |
+| Execution timeout | 5s (configurable via `EXEC_TIMEOUT_MS`) |
 
 ### Endpoints
 

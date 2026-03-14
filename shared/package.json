@@ -1,0 +1,12 @@
+{
+  "name": "npxall-shared",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared utilities for npxall API and MCP servers",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
+}

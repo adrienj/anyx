@@ -1,15 +1,18 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache bubblewrap
+
 WORKDIR /app
 
-# Install npm packages
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Install API dependencies (preserve directory structure for ../shared/ imports)
+COPY api/package.json api/package-lock.json ./api/
+RUN cd api && npm ci --omit=dev
 
-# Copy server
-COPY server.js .
+# Copy shared modules and API server
+COPY shared/ ./shared/
+COPY api/server.js ./api/
 
-# Create cache dir and non-root user
+# Non-root user with writable cache directory
 RUN addgroup -S npxall && adduser -S npxall -G npxall \
   && mkdir -p /app/cache \
   && chown -R npxall:npxall /app
@@ -18,4 +21,4 @@ USER npxall
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "api/server.js"]
