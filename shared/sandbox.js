@@ -9,7 +9,15 @@ const RUNNER_PATH = join(__dirname, 'sandbox-runner.js');
 let _bwrapAvailable;
 export function isBwrapAvailable() {
   if (_bwrapAvailable === undefined) {
-    const result = spawnSync('bwrap', ['--version'], { stdio: 'pipe', timeout: 5000 });
+    // Test an actual sandbox operation, not just --version.
+    // bwrap --version succeeds even when namespace operations are denied
+    // (e.g. Docker without proper permissions).
+    const result = spawnSync('bwrap', [
+      '--ro-bind', '/', '/',
+      '--unshare-net',
+      '--unshare-pid',
+      '--', '/bin/true',
+    ], { stdio: 'pipe', timeout: 5000 });
     _bwrapAvailable = result.status === 0;
     if (!_bwrapAvailable) {
       console.log('[sandbox] WARNING: bwrap unavailable — running without namespace isolation');
